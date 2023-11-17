@@ -27,7 +27,7 @@ resource "yandex_compute_instance" "vm-1" {
     # Сетевой интерфейс:
     # нужно указать идентификатор подсети, к которой будет подключена ВМ
     network_interface {
-        subnet_id = "e9bmq2f27li3v3u21i30"
+        subnet_id = var.instance_subnet_id #"e9bmq2f27li3v3u21i30"
         nat       = true
     }
 

@@ -46,3 +46,9 @@ variable "instance_disk_size" {
   type        = string
   description = "instance disk size in GB"
 } 
+
+variable "instance_subnet_id" {
+  default = "e9bmq2f27li3v3u21i30"
+  type = string
+  description = "subnet for VM"
+}
