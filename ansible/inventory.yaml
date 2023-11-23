@@ -1,0 +1,8 @@
+all: # Все серверы в нашем inventory, all - обязателен
+  children: # Дочерние группы для all
+    web: # Группа хостов 
+      hosts:
+        web-server:
+          ansible_host: 158.160.34.77
+          ansible_user: ansible
+          ansible_become: true
