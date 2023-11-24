@@ -1,0 +1,6 @@
+- hosts: web-server
+  roles:
+    - name: frontend
+      role: frontend
+    - name: backend
+      role: backend

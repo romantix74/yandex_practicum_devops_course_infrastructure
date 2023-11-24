@@ -1,0 +1,62 @@
+---
+# tasks file for backend
+- name: Update apt repo and cache  
+  become: true
+  apt: 
+    update_cache: yes 
+    force_apt_get: yes 
+    cache_valid_time: 3600 
+
+- name: Install openjdk-16-jdk
+  become: true
+  ansible.builtin.package:
+    name:
+      - openjdk-16-jdk
+    state: latest
+
+- name: Добавим сервисного пользователя
+  user:
+    name: "{{ backend_service_user }}"
+    create_home: no
+    shell: /sbin/nologin
+
+- name: ensures {{ backend_lib_directory }} dir is exists
+  file:
+    path: "{{ backend_lib_directory }}"
+    state: directory
+
+- name: Install prerequisites for maven_artifacts
+  ansible.builtin.package:
+    name:
+      - python3
+      - python3-pip
+    state: latest
+
+- name: Install pip modules for maven_artifacts
+  ansible.builtin.pip:
+    name: lxml
+
+- name: Используем модуль maven_artifact, он скачает пакет приложения c Nexus
+  community.general.maven_artifact:
+    dest: "{{ backend_lib_directory }}/sausage-store.jar"
+    repository_url: "https://nexus.k8s.praktikum-services.tech/repository/std-022-024-backend/" #"https://nexus.praktikum-services.tech/repository/sausage-store"
+    group_id: "com.yandex.practicum.devops"
+    artifact_id: "sausage-store"
+    version: "{{ backend_maven_version }}"
+    username: "{{ maven_username }}"
+    password: "{{ maven_password }}"
+    owner: "{{ backend_service_user }}"
+
+- name: Ensure Sausage Store Backend service unit 
+  template:
+    src: sausage-store-backend.service.j2
+    dest: /etc/systemd/system/sausage-store-backend.service
+
+- name: Перечитываем конфигурацию systemd
+  systemd:
+    daemon_reload: yes
+
+- name: запускаем backend
+  service:
+    name: sausage-store-backend
+    state: restarted 

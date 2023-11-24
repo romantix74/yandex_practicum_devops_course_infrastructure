@@ -1,0 +1,100 @@
+# ---
+# tasks file for frontend
+- name: Update apt repo and cache  
+  become: true
+  apt: 
+    upgrade: yes
+    update_cache: yes
+    cache_valid_time: 3600 
+
+- name: install npm
+  become: true
+  ansible.builtin.package:
+    name:
+      - npm
+    state: latest
+
+- name: Install nodejs
+  ansible.builtin.shell: |
+    curl -SLO https://deb.nodesource.com/nsolid_setup_deb.sh
+    chmod 500 nsolid_setup_deb.sh
+    ./nsolid_setup_deb.sh {{ node_major_version }}
+    apt-get install nodejs -y
+
+- name: Install http-server globally.
+  community.general.npm:
+    name: http-server
+    global: true
+
+- name: set capabilities for http-server
+  ansible.builtin.shell:  setcap CAP_NET_BIND_SERVICE=+eip /usr/bin/node
+
+- name: Добавим сервисного пользователя
+  user:
+    name: "{{ frontend_service_user }}"
+    create_home: no
+    shell: /sbin/nologin
+
+- name: ensures {{ frontend_work_dir }} dir is exists
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ frontend_service_user}}"
+    group: "{{ frontend_service_user}}"
+    mode: '0755'
+  loop:
+    - "{{ frontend_work_dir }}"
+    - "{{ frontend_report_path }}"
+    - "{{ frontend_log_path }}"
+
+# - name: Install prerequisites for maven_artifacts
+#   ansible.builtin.package:
+#     name:
+#       - python3
+#       - python3-pip
+#     state: latest
+
+# - name: Install pip modules for maven_artifacts
+#   ansible.builtin.pip:
+#     name: lxml
+
+# - name: Используем модуль maven_artifact, он скачает пакет приложения c Nexus
+#   community.general.maven_artifact:
+#     dest: "{{ frontend_work_dir }}"
+#     extension: "tar.gz"
+#     repository_url: "https://nexus.k8s.praktikum-services.tech/repository/std-022-024-frontend_1/" #"https://nexus.praktikum-services.tech/repository/sausage-store"
+#     group_id: "{{ frontend_maven_version }}"
+#     artifact_id: "sausage-store"
+#     version: "{{ frontend_maven_version }}"
+#     username: "{{ maven_username }}"
+#     password: "{{ maven_password }}"
+#     owner: "{{ frontend_service_user }}"
+
+- name: Get frontend archive
+  ansible.builtin.get_url:
+    url: "https://nexus.k8s.praktikum-services.tech/repository/std-022-024-frontend_1/{{ frontend_maven_version }}/sausage-store-{{ frontend_maven_version }}.tar.gz"
+    dest: /tmp/sausage-store.tar.gz
+    username: "{{ maven_username }}"
+    password: "{{ maven_password }}"
+
+- name: Extract frontend archive to {{ frontend_work_dir}}
+  ansible.builtin.unarchive:
+    src: /tmp/sausage-store.tar.gz
+    dest: "{{ frontend_work_dir }}"
+    owner: "{{ frontend_service_user}}"
+    group: "{{ frontend_service_user}}"
+    remote_src: yes
+
+- name: Ensure Sausage Store Frontend service unit 
+  template:
+    src: sausage-store-frontend.service.j2
+    dest: /etc/systemd/system/sausage-store-frontend.service
+
+- name: Перечитываем конфигурацию systemd
+  systemd:
+    daemon_reload: yes
+
+- name: запускаем frontend
+  service:
+    name: sausage-store-frontend
+    state: restarted 
