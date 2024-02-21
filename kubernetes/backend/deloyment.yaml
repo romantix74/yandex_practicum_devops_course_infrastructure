@@ -1,0 +1,45 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  labels:
+    app: backend
+spec:
+  revisionHistoryLimit: 15
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 20%
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: gitlab.praktikum-services.ru:5050/std-022-024/sausage-store/sausage-backend:1.0.1090986
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: backend-envs
+            # - secretRef:
+            #     name: backend-secrets
+          ports:
+            - name: backend
+              containerPort: 8080
+          # livenessProbe:
+          #   httpGet:
+          #     path: /actuator/health
+          #     port: 8080
+          #   initialDelaySeconds: 15
+          #   periodSeconds: 30
+          #   timeoutSeconds: 1
+          #   failureThreshold: 6
+      imagePullSecrets:
+        - name: docker-config-secret
