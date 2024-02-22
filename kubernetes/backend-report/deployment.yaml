@@ -1,0 +1,70 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-report
+  labels:
+    app: backend-report
+spec:
+  revisionHistoryLimit: 15
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: backend-report
+  template:
+    metadata:
+      labels:
+        app: backend-report
+    spec:
+      hostname: backend-report
+      containers:
+        - name: backend-report
+          image: gitlab.praktikum-services.ru:5050/std-022-024/sausage-store/backend-report:latest
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: backend-report-envs
+            - secretRef:
+                name: backend-report-secrets
+          ports:
+            - name: backend-report
+              containerPort: 8080
+          # livenessProbe:
+          #   httpGet:
+          #     path: /health
+          #     port: 8080
+          #   initialDelaySeconds: 15
+          #   periodSeconds: 30
+          #   timeoutSeconds: 1
+          #   failureThreshold: 6
+          resources:
+            limits:
+              cpu: 1
+            requests:
+              cpu: 100m
+      imagePullSecrets:
+        - name: docker-config-secret
+
+# ---
+# apiVersion: autoscaling/v2beta2
+# kind: HorizontalPodAutoscaler
+# metadata:
+#   name: backend-report-hpa
+#   labels:
+#     app: backend-report-hpa
+# spec:
+#   scaleTargetRef:
+#     apiVersion: apps/v1
+#     kind: Deployment
+#     name: backend-report
+#   minReplicas: 1
+#   maxReplicas: 5
+#   metrics:
+#   - type: Resource
+#     resource:
+#       name: cpu
+#       target:
+#         type: Utilization
+#         averageUtilization: 75
