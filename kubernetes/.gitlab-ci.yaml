@@ -58,4 +58,3 @@ deploy:
     # - kubectl describe deployment frontend --kubeconfig ~/.kube/config
 
     - rm ~/.kube/config
-
