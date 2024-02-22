@@ -47,6 +47,7 @@ spec:
       imagePullSecrets:
         - name: docker-config-secret
 
+
 # ---
 # apiVersion: autoscaling/v2beta2
 # kind: HorizontalPodAutoscaler
