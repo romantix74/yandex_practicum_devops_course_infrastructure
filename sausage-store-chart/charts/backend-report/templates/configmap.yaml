@@ -1,0 +1,8 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-report-envs
+data:
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://rc1a-swsg2g6j6bhznvm0.mdb.yandexcloud.net:6432/std-022-024"
+  PORT: "8080"
