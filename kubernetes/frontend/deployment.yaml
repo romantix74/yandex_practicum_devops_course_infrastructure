@@ -18,15 +18,16 @@ spec:
       labels:
         app: frontend
     spec:
-      # affinity:
-      #   nodeAffinity:
-      #     requiredDuringSchedulingIgnoredDuringExecution:
-      #       nodeSelectorTerms:
-      #       - matchExpressions:
-      #         - key: app
-      #           operator: In
-      #           values:
-      #           - frontend
+      # Affinity для фронтенда на Node c label application=front
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - frontend
       containers:
         - name: frontend
           image: gitlab.praktikum-services.ru:5050/std-022-024/sausage-store/sausage-frontend:1.1.3

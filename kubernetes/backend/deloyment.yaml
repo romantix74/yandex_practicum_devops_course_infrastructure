@@ -11,6 +11,7 @@ spec:
   strategy:
     type: RollingUpdate
     rollingUpdate:
+      # всегда был 1 работающий Pod, а количество Pod, превышающих максимальное, было не более 20%
       maxUnavailable: 0
       maxSurge: 20%
   selector:
@@ -33,13 +34,38 @@ spec:
           ports:
             - name: backend
               containerPort: 8080
-          # livenessProbe:
-          #   httpGet:
-          #     path: /actuator/health
-          #     port: 8080
-          #   initialDelaySeconds: 15
-          #   periodSeconds: 30
-          #   timeoutSeconds: 1
-          #   failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 6
       imagePullSecrets:
         - name: docker-config-secret
+
+---
+# glava 9.4 task 6:  VPA для бэкенда сосисочной в режиме Auto, для cpu и memory.
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: backend
+spec:
+  targetRef:
+    apiVersion: "apps/v1"
+    kind: Deployment
+    name: backend
+  updatePolicy:
+    updateMode: "Auto"
+  resourcePolicy:
+    containerPolicies:
+      - containerName: "*"
+        minAllowed:
+          cpu: 50m
+          memory: 100Mi
+        maxAllowed:
+          cpu: 1
+          memory: 500Mi
+        controlledResources: ["cpu", "memory"]
+        controlledValues: RequestsAndLimits

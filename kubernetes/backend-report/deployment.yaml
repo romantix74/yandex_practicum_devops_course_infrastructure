@@ -31,14 +31,14 @@ spec:
           ports:
             - name: backend-report
               containerPort: 8080
-          # livenessProbe:
-          #   httpGet:
-          #     path: /health
-          #     port: 8080
-          #   initialDelaySeconds: 15
-          #   periodSeconds: 30
-          #   timeoutSeconds: 1
-          #   failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 30
+            timeoutSeconds: 1
+            failureThreshold: 6
           resources:
             limits:
               cpu: 1
@@ -47,25 +47,25 @@ spec:
       imagePullSecrets:
         - name: docker-config-secret
 
-
-# ---
-# apiVersion: autoscaling/v2beta2
-# kind: HorizontalPodAutoscaler
-# metadata:
-#   name: backend-report-hpa
-#   labels:
-#     app: backend-report-hpa
-# spec:
-#   scaleTargetRef:
-#     apiVersion: apps/v1
-#     kind: Deployment
-#     name: backend-report
-#   minReplicas: 1
-#   maxReplicas: 5
-#   metrics:
-#   - type: Resource
-#     resource:
-#       name: cpu
-#       target:
-#         type: Utilization
-#         averageUtilization: 75
+---
+# 1 изначальный Pod и 5 при максимальной нагрузке. Развёртывание новых Pod при достижении 75% загрузки CPU.
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: backend-report-hpa
+  labels:
+    app: backend-report-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: backend-report
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 75
