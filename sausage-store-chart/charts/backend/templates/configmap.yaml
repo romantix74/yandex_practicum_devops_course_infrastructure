@@ -1,0 +1,22 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-envs
+data:
+  SPRING_DATASOURCE_USERNAME: "std-022-024"
+  SPRING_DATASOURCE_PASSWORD: "Testusr1234"
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://rc1a-swsg2g6j6bhznvm0.mdb.yandexcloud.net:6432/std-022-024"
+  SPRING_FLYWAY_BASELINE-ON-MIGRATE: "true"
+  SPRING_DATA_MONGODB_URI: "mongodb://std-022-024:Testusr1234@rc1a-sui0a7vifhdsk9b1.mdb.yandexcloud.net:27018/std-022-024?tls=true&tlsAllowInvalidCertificates=true"
+  VIRTUAL_HOST: "backend"
+
+  # SPRING_DATASOURCE_URL: "jdbc:postgresql://rc1b-x9g34dxygn60eu1y.mdb.yandexcloud.net:6432/std-xxx-xx"
+  # SPRING_CLOUD_VAULT_HOST: "std-xxx-xx.praktikum-services.tech"
+  # SPRING_CLOUD_VAULT_PORT: "8200"
+  # SPRING_CLOUD_VAULT_SCHEME: "http"
+  # SPRING_CLOUD_VAULT_KV_BACKEND: "secret"
+  # SPRING_CLOUD_VAULT_KV_ENABLED: "true"
+  # SPRING_APPLICATION_NAME: "sausage-store/spring.datasource.username,sausage-store/spring.datasource.password,sausage-store/spring.data.mongodb.uri"
+  # SPRING_CONFIG_IMPORT: "vault://secret/sausage-store/spring.datasource.username,vault://secret/sausage-store/spring.datasource.password,vault://secret/sausage-store/spring.data.mongodb.uri"
+  # VIRTUAL_HOST: "backend"
